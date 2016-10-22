@@ -1,0 +1,11 @@
+extern size_t strlen(char const *str);
+extern size_t terminal_row;
+extern size_t terminal_column;
+extern uint8_t terminal_colour;
+extern uint16_t *terminal_buffer;
+extern void terminal_initialise(void);
+extern void terminal_setcolour(uint8_t colour);
+extern void terminal_putentryat(char c, uint8_t colour, size_t x, size_t y);
+extern void terminal_putchar(char c);
+extern void terminal_write(char const *data, size_t size);
+extern void terminal_writestring(char const *data);

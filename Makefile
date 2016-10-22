@@ -8,11 +8,14 @@ clean:
 
 .PHONY: all clean
 
-axiom.bin: src/linker.ld boot.o kernel.o
-	${CC} -T src/linker.ld -o axiom.bin -ffreestanding -O2 -nostdlib boot.o  kernel.o -lgcc
+axiom.bin: src/linker.ld boot.o kernel.o term.o
+	${CC} -T src/linker.ld -o axiom.bin -ffreestanding -O2 -nostdlib boot.o  kernel.o term.o -lgcc
 
-boot.o: src/arch/i686/boot.s
-	${AS} src/arch/i686/boot.s -o boot.o
+boot.o: src/boot.s
+	${AS} src/boot.s -o boot.o
 
-kernel.o: src/kernel.c
+kernel.o: src/kernel.c src/term.h
 	${CC} -c src/kernel.c -o kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+
+term.o: src/term.c src/term.h
+	${CC} -c src/term.c -o term.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
