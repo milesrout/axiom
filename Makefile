@@ -6,7 +6,10 @@ all: axiom.bin
 clean:
 	rm *.o *.bin
 
-.PHONY: all clean
+run: all
+	qemu-system-i386 -kernel axiom.bin
+
+.PHONY: all clean run
 
 axiom.bin: src/linker.ld boot.o kernel.o term.o
 	${CC} -T src/linker.ld -o axiom.bin -ffreestanding -O2 -nostdlib boot.o  kernel.o term.o -lgcc
