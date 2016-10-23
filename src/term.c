@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,6 +19,7 @@ static uint16_t vga_entry(unsigned char uc, uint8_t colour)
 
 static size_t const VGA_WIDTH = 80;
 static size_t const VGA_HEIGHT = 25;
+static size_t const TAB_WIDTH = 8;
 
 size_t terminal_row;
 size_t terminal_column;
@@ -83,10 +85,42 @@ void terminal_putchar(char c)
 		terminal_advanceline();
 		return;
 	}
+	if (c == '\t') {
+		terminal_column -= (terminal_column % TAB_WIDTH);
+		terminal_column += TAB_WIDTH;
+		if (terminal_column >= VGA_WIDTH)
+			terminal_advanceline();
+		return;
+	};
+
 	terminal_putentryat(c, terminal_colour, terminal_column, terminal_row);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_advanceline();
 	}
+}
+
+void terminal_putbin_u32(uint32_t n)
+{
+	int i;
+	terminal_putchar('0');
+	terminal_putchar('b');
+	for (i = 0; i < 32; i++) {
+		bool b = (n & (1 << (32 - i))) >> (32 - i);
+		if (b)
+			terminal_putchar('1');
+		else
+			terminal_putchar('0');
+	}
+}
+
+void terminal_putptr(void const *p)
+{
+	terminal_putint_u32((uint32_t)p);
+}
+
+void terminal_putint_u32(uint32_t n)
+{
+	terminal_putint_u64((uint64_t)n);
 }
 
 void terminal_putint_u64(uint64_t n)
@@ -102,8 +136,14 @@ void terminal_putint_u64(uint64_t n)
 	}
 
 	while (*p != '\0') {
-		terminal_putchar(*p++);
+		p++;
 	}
+
+	p--;
+
+	do {
+		terminal_putchar(*p--);
+	} while (p >= num);
 }
 
 void terminal_write(char const *data, size_t size)
