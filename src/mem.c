@@ -1,6 +1,6 @@
 #include <stddef.h>
 
-#include "string.h"
+#include "mem.h"
 
 void *memmove(void *dst, void const *src, size_t count)
 {

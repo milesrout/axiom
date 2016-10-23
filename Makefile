@@ -22,7 +22,7 @@ boot.o: src/boot.s
 kernel.o: src/kernel.c src/term.h
 	${CC} -c src/kernel.c -o kernel.o ${CFLAGS}
 
-term.o: src/term.c src/term.h src/string.h
+term.o: src/term.c src/term.h src/string.h src/mem.h
 	${CC} -c src/term.c -o term.o ${CFLAGS}
 
 string.o: src/string.c src/string.h

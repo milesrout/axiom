@@ -21,5 +21,6 @@ extern void terminal_initialise(void);
 extern void terminal_setcolour(uint8_t colour);
 extern void terminal_putentryat(char c, uint8_t colour, size_t x, size_t y);
 extern void terminal_putchar(char c);
+extern void terminal_putint_u64(uint64_t c);
 extern void terminal_write(char const *data, size_t size);
 extern void terminal_writestring(char const *data);

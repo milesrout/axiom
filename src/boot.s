@@ -16,11 +16,18 @@ stack_bottom:
 .skip 16384
 stack_top:
 
+.section .data
+.align 4
+.global _multiboot_info
+_multiboot_info:
+.long 0
+
 .section .text
 .global _start
 .type _start, @function
 _start:
 	mov $stack_top, %esp
+	mov %ebx, (_multiboot_info)
 	call kernel_main
 	cli
 1:	hlt

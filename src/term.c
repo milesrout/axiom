@@ -89,6 +89,23 @@ void terminal_putchar(char c)
 	}
 }
 
+void terminal_putint_u64(uint64_t n)
+{
+	/* a 64-bit unsigned integer has at most 20 digits */
+	char num[21] = {0};
+	int i = 0;
+	char *p = num;
+
+	while (n != 0 && i != 20) {
+		num[i++] = (n % 10) + '0';
+		n /= 10;
+	}
+
+	while (*p != '\0') {
+		terminal_putchar(*p++);
+	}
+}
+
 void terminal_write(char const *data, size_t size)
 {
 	size_t i;
