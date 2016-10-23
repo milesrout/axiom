@@ -14,7 +14,7 @@ enum vga_colour {
 	VGA_COLOUR_LIGHT_RED = 12,
 	VGA_COLOUR_LIGHT_MAGENTA = 13,
 	VGA_COLOUR_LIGHT_BROWN = 14,
-	VGA_COLOUR_WHITE = 15,
+	VGA_COLOUR_WHITE = 15
 };
 extern uint8_t vga_entry_colour(enum vga_colour fg, enum vga_colour bg);
 extern void terminal_initialise(void);

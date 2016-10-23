@@ -1,5 +1,7 @@
 CC = i686-elf-gcc
 AS = i686-elf-as
+CFLAGS_WARNINGS = -Wall -Wextra
+CFLAGS = -std=c89 -pedantic -ffreestanding -O2 ${CFLAGS_WARNINGS}
 
 all: axiom.bin
 
@@ -18,13 +20,13 @@ boot.o: src/boot.s
 	${AS} src/boot.s -o boot.o
 
 kernel.o: src/kernel.c src/term.h
-	${CC} -c src/kernel.c -o kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	${CC} -c src/kernel.c -o kernel.o ${CFLAGS}
 
 term.o: src/term.c src/term.h src/string.h
-	${CC} -c src/term.c -o term.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	${CC} -c src/term.c -o term.o ${CFLAGS}
 
 string.o: src/string.c src/string.h
-	${CC} -c src/string.c -o string.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	${CC} -c src/string.c -o string.o ${CFLAGS}
 
 mem.o: src/mem.c src/mem.h
-	${CC} -c src/mem.c -o mem.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	${CC} -c src/mem.c -o mem.o ${CFLAGS}

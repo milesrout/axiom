@@ -26,12 +26,14 @@ uint16_t *terminal_buffer;
 
 void terminal_initialise(void)
 {
+	size_t x, y;
+
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal_colour = vga_entry_colour(VGA_COLOUR_LIGHT_GREY, VGA_COLOUR_BLACK);
 	terminal_buffer = (uint16_t*) 0xb8000;
-	for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
+	for (y = 0; y < VGA_HEIGHT; y++) {
+		for (x = 0; x < VGA_WIDTH; x++) {
 			size_t const index = y*VGA_WIDTH + x;
 			terminal_buffer[index] = vga_entry(' ', terminal_colour);
 		}
@@ -54,6 +56,8 @@ static void terminal_advanceline(void)
 	/* if we're at the end of the terminal, start shuffling everything up
 	   a row at a time */
 	if (++terminal_row == VGA_HEIGHT) {
+		size_t x;
+
 		/* actually stay on the last row */
 		terminal_row--;
 
@@ -63,7 +67,7 @@ static void terminal_advanceline(void)
 			sizeof(uint16_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
 
 		/* clear the last row */
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
+		for (x = 0; x < VGA_WIDTH; x++) {
 			size_t const index = terminal_row*VGA_WIDTH + x;
 			terminal_buffer[index] = vga_entry(' ', terminal_colour);
 		}
@@ -87,7 +91,9 @@ void terminal_putchar(char c)
 
 void terminal_write(char const *data, size_t size)
 {
-	for (size_t i = 0; i < size; i++)
+	size_t i;
+
+	for (i = 0; i < size; i++)
 		terminal_putchar(data[i]);
 }
 
