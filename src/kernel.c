@@ -3,12 +3,13 @@
 
 #include "term.h"
 
-extern uint64_t _multiboot_info;
+extern struct multiboot_data *_multiboot_info;
+extern void multiboot_init(struct multiboot_data *mb_info);
 
 void kernel_main(void)
 {
 	terminal_initialise();
 	terminal_writestring("Hello, kernel!\n");
-	terminal_putint_u64(_multiboot_info);
-	terminal_putchar('\n');
+
+	multiboot_init(_multiboot_info);
 }

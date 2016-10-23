@@ -105,7 +105,8 @@ void terminal_putbin_u32(uint32_t n)
 	terminal_putchar('0');
 	terminal_putchar('b');
 	for (i = 0; i < 32; i++) {
-		bool b = (n & (1 << (32 - i))) >> (32 - i);
+		bool b = (n & (1 << (31 - i))) >> (31 - i);
+		if (i != 0 && i % 4 == 0) terminal_putchar('_');
 		if (b)
 			terminal_putchar('1');
 		else
@@ -129,6 +130,11 @@ void terminal_putint_u64(uint64_t n)
 	char num[21] = {0};
 	int i = 0;
 	char *p = num;
+
+	if (n == 0) {
+		terminal_putchar('0');
+		return;
+	}
 
 	while (n != 0 && i != 20) {
 		num[i++] = (n % 10) + '0';

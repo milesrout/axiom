@@ -19,6 +19,7 @@ stack_top:
 .section .data
 .align 4
 .global _multiboot_info
+.type _multiboot_info, @object
 _multiboot_info:
 .long 0
 
