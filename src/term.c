@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include "string.h"
 #include "term.h"
 
 enum vga_colour {
@@ -73,14 +74,39 @@ void terminal_putentryat(char c, uint8_t colour, size_t x, size_t y)
 	terminal_buffer[index] = vga_entry(c, colour);
 }
 
+static void terminal_advanceline(void)
+{
+	/* if we're at the end of the terminal, start shuffling everything up
+	   a row at a time */
+	if (++terminal_row == VGA_HEIGHT) {
+		/* actually stay on the last row */
+		terminal_row--;
+
+		/* move everything backwards by a row */
+		memmove(terminal_buffer,
+			terminal_buffer + VGA_WIDTH,
+			sizeof(uint16_t) * VGA_WIDTH * (VGA_HEIGHT - 1));
+
+		/* clear the last row */
+		for (size_t x = 0; x < VGA_WIDTH; x++) {
+			size_t const index = terminal_row*VGA_WIDTH + x;
+			terminal_buffer[index] = vga_entry(' ', terminal_colour);
+		}
+	}
+
+	/* go back to the beginning of the row */
+	terminal_column = 0;
+}
+
 void terminal_putchar(char c)
 {
+	if (c == '\n') {
+		terminal_advanceline();
+		return;
+	}
 	terminal_putentryat(c, terminal_colour, terminal_column, terminal_row);
 	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT) {
-			terminal_row = 0;
-		}
+		terminal_advanceline();
 	}
 }
 
