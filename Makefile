@@ -1,7 +1,8 @@
+
 CC = i686-elf-gcc
 AS = i686-elf-as
-CFLAGS_WARNINGS = -Wall -Wextra
-CFLAGS = -std=c89 -pedantic -ffreestanding -O2 ${CFLAGS_WARNINGS}
+CFLAGS = -std=c89 -pedantic -ffreestanding -O2 -W -Wall
+LDFLAGS = -ffreestanding -O2 -nostdlib
 
 all: axiom.bin
 
@@ -9,27 +10,27 @@ clean:
 	rm *.o *.bin
 
 run: all
-	qemu-system-i386 -kernel axiom.bin
+	qemu-system-i386 -kernel axiom.bin -initrd axiom.bin
 
 .PHONY: all clean run
 
-axiom.bin: src/linker.ld boot.o kernel.o term.o string.o mem.o kernel_multiboot.o
-	${CC} -T src/linker.ld -o axiom.bin -ffreestanding -O2 -nostdlib boot.o  kernel.o term.o string.o mem.o kernel_multiboot.o -lgcc
+axiom.bin: linker.ld kernel.o string.o multiboot.o term.o mem.o boot.o
+	${CC} -T linker.ld -o axiom.bin ${LDFLAGS} kernel.o string.o multiboot.o term.o mem.o boot.o -lgcc
 
-boot.o: src/boot.s
-	${AS} src/boot.s -o boot.o
+boot.o: boot.s 
+	${AS} boot.s -o boot.o
 
-kernel.o: src/kernel.c src/term.h
-	${CC} -c src/kernel.c -o kernel.o ${CFLAGS}
+kernel.o: kernel.c term.h
+	${CC} -c kernel.c -o kernel.o ${CFLAGS}
 
-kernel_multiboot.o: src/kernel_multiboot.c src/term.h
-	${CC} -c src/kernel_multiboot.c -o kernel_multiboot.o ${CFLAGS}
+string.o: string.c string.h
+	${CC} -c string.c -o string.o ${CFLAGS}
 
-term.o: src/term.c src/term.h src/string.h src/mem.h
-	${CC} -c src/term.c -o term.o ${CFLAGS}
+multiboot.o: multiboot.c term.h
+	${CC} -c multiboot.c -o multiboot.o ${CFLAGS}
 
-string.o: src/string.c src/string.h
-	${CC} -c src/string.c -o string.o ${CFLAGS}
+term.o: term.c mem.h string.h term.h
+	${CC} -c term.c -o term.o ${CFLAGS}
 
-mem.o: src/mem.c src/mem.h
-	${CC} -c src/mem.c -o mem.o ${CFLAGS}
+mem.o: mem.c mem.h
+	${CC} -c mem.c -o mem.o ${CFLAGS}

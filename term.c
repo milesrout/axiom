@@ -99,7 +99,7 @@ void terminal_putchar(char c)
 	}
 }
 
-void terminal_putbin_u32(uint32_t n)
+void terminal_put_u32b(uint32_t n)
 {
 	int i;
 	terminal_putchar('0');
@@ -114,17 +114,17 @@ void terminal_putbin_u32(uint32_t n)
 	}
 }
 
-void terminal_putptr(void const *p)
+void terminal_put_ptr(void const *p)
 {
-	terminal_putint_u32((uint32_t)p);
+	terminal_put_u32((uint32_t)p);
 }
 
-void terminal_putint_u32(uint32_t n)
+void terminal_put_u32(uint32_t n)
 {
-	terminal_putint_u64((uint64_t)n);
+	terminal_put_u64((uint64_t)n);
 }
 
-void terminal_putint_u64(uint64_t n)
+void terminal_put_u64(uint64_t n)
 {
 	/* a 64-bit unsigned integer has at most 20 digits */
 	char num[21] = {0};
@@ -160,7 +160,7 @@ void terminal_write(char const *data, size_t size)
 		terminal_putchar(data[i]);
 }
 
-void terminal_writestring(char const *data)
+void terminal_put_str(char const *data)
 {
 	terminal_write(data, strlen(data));
 }
