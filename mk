@@ -14,26 +14,9 @@ def accumulate(accum_type):
         return inner_wrapper
     return outer_wrapper
 
-include_regex = re.compile('#include "(.*)"')
-
-header = """
-CC = i686-elf-gcc
-AS = i686-elf-as
-CFLAGS = -std=c89 -pedantic -ffreestanding -O2 -W -Wall
-LDFLAGS = -ffreestanding -O2 -nostdlib
-
-all: axiom.bin
-
-clean:
-\trm *.o *.bin
-
-run: all
-\tqemu-system-i386 -kernel axiom.bin -initrd axiom.bin
-
-.PHONY: all clean run
-"""
-
-def dependencies(path):
+def dependencies(path, include_regex=re.compile('#include "(.*)"')):
+    if isinstance(include_regex, str):
+        include_regex = re.compile(include_regex)
     with path.open('r') as f:
         for line in f:
             match = include_regex.match(line)
@@ -46,41 +29,44 @@ def files(ext, obj_ext='.o'):
         source_file = fname.relative_to(Path.cwd())
         yield source_file, source_file.with_suffix(obj_ext)
 
-def print_final_target(obj_files):
-    obj_files_string = ' '.join(str(obj_file) for obj_file in obj_files)
-    print('axiom.bin: linker.ld {obj_files}'.format(
-        obj_files=obj_files_string))
-    print('\t${{CC}} -T linker.ld -o axiom.bin ${{LDFLAGS}} {obj_files} -lgcc'.format(
-        obj_files=obj_files_string))
+def objfiles_variable(obj_files):
+    return 'OBJFILES = {}'.format(' '.join(map(str, obj_files)))
 
-def print_targets(files, target_template, *cmd_templates):
+def source_targets(files, target_template, *cmd_templates):
     for source_file, object_file in files.items():
-        print()
+        yield ''
 
-        print(target_template.format(
+        yield target_template.format(
             obj_file=object_file,
             source_file=source_file,
-            deps=' '.join(dependencies(source_file))))
+            deps=' '.join(dependencies(source_file)))
         for cmd in cmd_templates:
-            print(cmd.format(
+             yield cmd.format(
                 source_file=source_file,
-                obj_file=object_file))
+                obj_file=object_file)
 
-def main():
+@accumulate('\n'.join)
+def get_makefile_text():
     source_files = files('.c')
     asm_files = files('.s')
 
-    print(header)
+    yield objfiles_variable(chain(source_files.values(), asm_files.values()))
 
-    print_final_target(chain(source_files.values(), asm_files.values()))
-
-    print_targets(asm_files,
+    yield from source_targets(asm_files,
             '{obj_file}: {source_file} {deps}',
             '\t${{AS}} {source_file} -o {obj_file}')
 
-    print_targets(source_files,
+    yield from source_targets(source_files,
             '{obj_file}: {source_file} {deps}',
             '\t${{CC}} -c {source_file} -o {obj_file} ${{CFLAGS}}')
 
+    yield ''
+
 if __name__ == '__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser(description='Generate dependency Makefile')
+    parser.add_argument('output', nargs='?', default='Makefile.mk',
+                        type=argparse.FileType('w'))
+
+    args = parser.parse_args()
+    args.output.write(get_makefile_text())
