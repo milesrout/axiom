@@ -8,7 +8,7 @@ extern void multiboot_init();
 void kernel_main(void)
 {
 	terminal_initialise();
-	terminal_put_str("Hello, kernel!\n");
+	terminal_printf("%s\n", "Hello, kernel!");
 
 	multiboot_init();
 }
