@@ -1,8 +1,10 @@
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "mem.h"
+#include "panic.h"
 #include "string.h"
 #include "term.h"
 
@@ -15,7 +17,6 @@ static uint16_t vga_entry(unsigned char uc, uint8_t colour)
 {
 	return (uint16_t) uc | (uint16_t) colour << 8;
 }
-
 
 static size_t const VGA_WIDTH = 80;
 static size_t const VGA_HEIGHT = 25;
@@ -79,6 +80,51 @@ static void terminal_advanceline(void)
 	terminal_column = 0;
 }
 
+void terminal_printf(char const *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    while ('\0' != *fmt) {
+        if ('%' == *fmt) {
+            fmt++;
+
+            if (*fmt == 'l') {
+                fmt++;
+
+                if (*fmt == 'u') {
+                    uint64_t v = va_arg(args, uint64_t);
+                    terminal_put_u64(v);
+                } else if (*fmt == 'b') {
+                    uint64_t v = va_arg(args, uint64_t);
+                    terminal_put_u64b(v);
+                } else {
+                    /* TODO: terminal_putstr(error message) */
+                    panic();
+                }
+            } else if (*fmt == 'u') {
+                uint32_t v = va_arg(args, uint32_t);
+                terminal_put_u32(v);
+            } else if (*fmt == 'b') {
+                uint32_t v = va_arg(args, uint32_t);
+                terminal_put_u32b(v);
+            } else if (*fmt == 'p') {
+                void *p = va_arg(args, void*);
+                terminal_put_ptr(p);
+            } else if (*fmt == 's') {
+                char const *s = va_arg(args, char*);
+                terminal_put_str(s);
+            } else {
+                /* TODO: terminal_putstr(error message) */
+                panic();
+            }
+        } else {
+            terminal_putchar(*fmt);
+        }
+        fmt++;
+    }
+}
+
 void terminal_putchar(char c)
 {
 	if (c == '\n') {
@@ -101,11 +147,16 @@ void terminal_putchar(char c)
 
 void terminal_put_u32b(uint32_t n)
 {
+    terminal_put_u64b((uint64_t)n);
+}
+
+void terminal_put_u64b(uint64_t n)
+{
 	int i;
 	terminal_putchar('0');
 	terminal_putchar('b');
-	for (i = 0; i < 32; i++) {
-		bool b = (n & (1 << (31 - i))) >> (31 - i);
+	for (i = 0; i < 64; i++) {
+		bool b = (n & (1 << (63 - i))) >> (63 - i);
 		if (i != 0 && i % 4 == 0) terminal_putchar('_');
 		if (b)
 			terminal_putchar('1');

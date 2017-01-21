@@ -26,4 +26,6 @@ extern void terminal_put_str(char const *data);
 extern void terminal_put_u32(uint32_t n);
 extern void terminal_put_u32b(uint32_t n);
 extern void terminal_put_u64(uint64_t n);
+extern void terminal_put_u64b(uint64_t n);
 extern void terminal_write(char const *data, size_t size);
+extern void terminal_printf(char const *fmt, ...);
